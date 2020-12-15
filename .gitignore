@@ -1,0 +1,26 @@
+# Executables and Package files
+
+target/
+bin/
+*.class
+*.war
+*.ear
+
+# Eclipse
+
+.project
+.classpath
+.target
+.externalToolBuilders
+.settings/
+.metadata
+*.launch
+
+# Temp files
+
+*.tmp
+*.bak
+
+# Virtual machine crash logs
+
+hs_err_pid*
