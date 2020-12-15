@@ -19,7 +19,6 @@ import java.text.SimpleDateFormat;
 import java.text.ParseException;
 
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.dao.DuplicateKeyException;
@@ -39,7 +38,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.io.Files;
 
 import com.mw.plugins.excel.ImportExcel;
-import com.mw.plugins.jdbc.JdbcDao;
 import com.mw.utils.DateTimeUtils;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 @Service
@@ -74,12 +72,10 @@ public class InputDataService {
 	private final static String[] cellNamesOfS3 = { ITAG_YYYYMMDD, "ZH_accumulated_meter1", "ZH_accumulated_meter2", "ZH_accumulated_meter3", "ZH_accumulated_meter4", "", "", "", "" };
 	private final static String[] cellNamesOfS4 = { ITAG_YYYYMMDD, "ZH_Res_Lapa_level", "ZH_Res_Lapa_rainfall", "ZH_Res_Lapa_salinity", "ZH_Res_Lapa_capacity10000", "ZH_Res_YK_level", "ZH_Res_YK_rainfall", "ZH_Res_YK_salinity", "ZH_Res_YK_capacity10000", "ZH_Res_SDK_level", "ZH_Res_SDK_rainfall", "ZH_Res_SDK_salinity", "ZH_Res_SDK_capacity10000", "ZH_Res_NP_level", "ZH_Res_NP_rainfall", "ZH_Res_NP_up_salinity", "ZH_Res_NP_down_salinity", "ZH_Res_NP_capacity10000" };
 	
-	@Autowired
-	private JdbcDao scadaDao;	
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(InputDataService.class);
 	@Resource
-	public NamedParameterJdbcTemplate jtCTDB;
+	public NamedParameterJdbcTemplate scada;
 	
 	@Scheduled(cron = "${cron.inputdata.save}")
 	public void saveData() throws Exception {
@@ -239,11 +235,11 @@ public class InputDataService {
 			String sql = null;
 			try {
 				sql = getAddSql(tableName,rowMap);
-				scadaDao.update(sql, param);
+				scada.update(sql, param);
 			} catch (DuplicateKeyException e) {
 				
 				sql = getUpdSql(tableName,rowMap);
-				scadaDao.update(sql, param);
+				scada.update(sql, param);
 			}
 			logger.info("sql-> {}", sql);
 			logger.info("rowMap-> {}", rowMap);
@@ -287,8 +283,8 @@ public class InputDataService {
 			fieldNameBuilder.append(key);
 			fieldValueBuilder.append(":").append(key);
 		}
-		//StringBuilder sqlSb = new StringBuilder("insert into scada_data.");
-		StringBuilder sqlSb = new StringBuilder("insert into ");
+		StringBuilder sqlSb = new StringBuilder("insert into scada_data.");
+		//StringBuilder sqlSb = new StringBuilder("insert into ");
 		sqlSb.append(tableName);
 		sqlSb.append("(");
 		sqlSb.append(fieldNameBuilder);
@@ -326,8 +322,8 @@ public class InputDataService {
 			i++;
 			fieldNameBuilder.append(key).append("=").append(":").append(key);
 		}
-		//StringBuilder sqlSb = new StringBuilder("update scada_data.");
-		StringBuilder sqlSb = new StringBuilder("update ");
+		StringBuilder sqlSb = new StringBuilder("update scada_data.");
+		//StringBuilder sqlSb = new StringBuilder("update ");
 		sqlSb.append(tableName);
 		sqlSb.append(" set ");
 		sqlSb.append(fieldNameBuilder);
